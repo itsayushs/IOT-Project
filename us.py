@@ -8,7 +8,7 @@ Created on Thu Mar  1 11:39:20 2018
 
 import RPi.GPIO as GPIO
 import time
- 
+import cap
 #GPIO Mode (BOARD / BCM)
 GPIO.setmode(GPIO.BCM)
  #set GPIO Pins
@@ -58,15 +58,20 @@ def ledfunc(s):
 #    GPIO.output(12,GPIO.LOW)
 if __name__ == '__main__':
     try:
+#       temp var to capture only 1 image when the object is removed
+        tcap=True
         while True:
             dist = distance()
             print ("Measured Distance = %.1f cm" % dist)
             if int(dist) > 25:
-                print "fuck"
+                print "Obj Removed"
+                if tcap==True:
+                    cap.clkpic()
+                    tcap=False
                 ledfunc(True)
             else:
                 ledfunc(False)
-                print "good shit"
+                print "Object Present"
             time.sleep(1)
  
         # Reset by pressing CTRL + C
