@@ -24,7 +24,7 @@ def noentry():
     GPIO.output(g,GPIO.LOW)
 def alloff():
     GPIO.output(r,GPIO.LOW)
-    GPIO.output(6,GPIO.LOW)
+    GPIO.output(g,GPIO.LOW)
 
 pin=6969
 cnt=0
@@ -39,4 +39,5 @@ while cnt!=3:
         print("wrong password")
         noentry()
         
+GPIO.cleanup()
         
