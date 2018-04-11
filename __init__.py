@@ -10,15 +10,30 @@ from forms import UserRegistrationForm,UserLoginForm
 from passlib.hash import sha256_crypt
 from functools import wraps
 import models as dbHandler
-
+import connect
 
 app=Flask(__name__)
 app.secret_key = '66049c07d9e8546699fe0872fd32d8f6'
 
 
-@app.route('/')
+@app.route('/',methods=['GET','POST'])
 def intro():
+    connect.redon()
+#    connect.uson()
+    if request.method == "POST":		
+            ip = request.form['ip']
+            session['ip'] = ip
+            return redirect(url_for('login'))
+#    elif session['logged_in'] == True:
+#            return redirect(url_for('home'))
+#    else:    
     return render_template('index.html')
+
+@app.route('/act',methods=['GET','POST'])
+def active():
+    connect.uson()
+    flash("Sensor activeated")
+    return redirect(url_for('intro'))
 
 @app.route('/register/', methods=["GET","POST"])
 def register_page():
@@ -38,7 +53,6 @@ def login():
     form = UserLoginForm(request.form)
     if request.method == "POST" and form.validate():
         username  = form.username.data
-        ip = form.piip.data
         dets=dbHandler.retrieveUsers(username)
         hashed=dets[0][0]
         email=dets[0][1]
@@ -46,13 +60,17 @@ def login():
             session['logged_in'] = True
             session['username'] = request.form['username']
             session['email'] = email
-            session['ip'] = ip
+            connect.greenon()
+#            connect.usoff()
             flash("You are now logged in")
             return redirect(url_for('home'))
         else:
             flash("incorrect password!")
             return render_template("login.html", form=form)
     return render_template("login.html", form=form)
+@app.route('/about/')
+def about():
+    return render_template("about.html")
 
 def login_required(f):
     @wraps(f)
@@ -64,12 +82,15 @@ def login_required(f):
             return redirect(url_for('login'))
     return wrap
 
+
 @app.route('/home')
 @login_required
 def home():
     user=session['username']
     email=session['email']
-    return render_template("home.html",uname=user,email=email)
+    ip_pi=connect.ip
+    ip_pi_l="{}:8081".format(ip_pi)
+    return render_template("home.html",uname=user,email=email,link=ip_pi_l)
 
 @app.route("/logout/")
 @login_required
